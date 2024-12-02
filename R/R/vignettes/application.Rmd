@@ -1,0 +1,282 @@
+---
+title: "Robust overidentification testing in linear IV models"
+author: "Stuart Lane"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Packages
+
+```{r, echo=FALSE, }
+setwd("C:/Users/sl14120/OneDrive - University of Bristol/score_test/R/R/vignettes")
+```
+
+```{r message=FALSE, warning=FALSE}
+library(ivmodel)
+source("../R/score_test.R")
+```
+
+## Introduction
+
+The `oidrobust` package offers improved overidentification testing in linear IV models. This package allows for the standard Sargan test (Sargan, 1958) and the Hansen $J$-test (Hansen, 1982), and allows for the use of LIML-based overidentification tests such as the Kleibergen-Paap test (Kleibergen & Paap, 2006), hereafter the $KP$-test. All test statistics considered are special cases of the score test (see Windmeijer (2022) and Lane and Windmeijer (2024) for theoretical properties and empirical evaluation of these test statistics).
+
+In this document, we are going to replicate a small version of Table 6.1 of Lane & Windmeijer (2024) using the `oidrobust` package. Specifically, this paper argues that the $KP$-test is typically preferable for robust overidentification testing compared to the $J$-test.
+
+## Model 
+
+The model of interest is
+$$
+\Delta c_{t+1} = \mu_c + \psi r_{t+1} + u_{t+1} \tag{1} \label{eis_regression}
+$$
+where $\Delta c_{t+1}$ is the log of the consumption growth rate at time $t+1$, $r_{t+1}$ is the log of the real interest rate at time $t+1$, $\psi$ is the parameter of interest, $\mu_c$ is a constant, and $u_{t+1}$ is the unobserved error. Parameter $\psi$ is the elasticity of intertemporal substitution. Here, $r_{t+1}$ will be endogenous by construction (see Yogo (2004) or Lane and Windmeijer (2024) for details). However, $u_{t+1}$ represents errors in expectations conditioned on the information set at time $t+1$, and therefore twice-lagged observable macroeconomic indicators should provide naturally valid instruments, in that $\mathbb{E}_t[Z_{t+1}u_{t+1}] = 0$, where $Z_{t+1}$ is a matrix of instruments consisting of twice-lagged macroeconomic indicators and $\mathbb{E}_t[\, \cdot \,]$ denotes the expectations operator conditional on the information set at time $t+1$.
+
+Since overidentification is easy to achieve in this model (simply select two macroeconomic indicators and twice-lag them), we should conduct an overidentification test to assess the validity of the instruments, we have good reason to believe *a priori* should be valid. The null and alternative hypotheses are:
+$$
+H_0 : \mathbb{E}_t[Z_{t+1}u_{t+1}] = 0 \,\,\,\, \text{v.s.} \,\,\,\, H_1 : \mathbb{E}_t[Z_{t+1}u_{t+1}] \neq 0 \tag{2} \label{eis_hypothesis}
+$$
+We can also re-normalise $\eqref{eis_regression}$ as
+$$
+r_{t+1} = \mu_r + \frac{1}{\psi}\Delta c_{t+1} + \eta_{t+1} \tag{3} \label{crra_regression}
+$$
+such that now $r_{t+1}$ is the outcome of interest and $\Delta c_{t+1}$ is now treated as the endogenous regressor. The moment restrictions now become
+$$
+H_0 : \mathbb{E}_t[Z_{t+1}u_{t+1}] = 0 \,\,\,\, \text{v.s.} \,\,\,\, H_1 : \mathbb{E}_t[Z_{t+1}u_{t+1}] \neq 0 \tag{4} \label{crra_hypothesis}
+$$
+where the null hypotheses in $\eqref{crra_hypothesis}$ and $\eqref{eis_hypothesis}$ are equivalent up to linear transformations, so validity of one moment restriction implies the validity of the other. However, we find empirically that weak instruments are a much bigger problem in the first specification in $\eqref{crra_regression}$ than in $\eqref{eis_regression}$.
+
+### Estimators and test statistics
+
+The two estimators used in this empirical application are 2SLS and LIML, defined as:
+$$
+    \hat{\psi}_{2SLS} = \left((\Delta c)'P_z\Delta c\right)^{-1}\left((\Delta c)'P_zr\right) \\
+    \hat{\psi}_{L} = \left((\Delta c)'P_z\Delta c - \hat{\alpha}_L(\Delta c)'\Delta         c\right)^{-1}\left((\Delta c)'P_zr - \hat{\alpha}_L(\Delta c)'r\right)
+$$
+where e.g. $\Delta c$ is the stacked vector of observations $\Delta c_{t+1}$, $P_z = Z(Z'Z)^{-1} Z'$ for $Z$ the matrix of stacked instrument vectors $Z_{t+1}'$, and $\hat{\alpha}_L$ is the smallest root of the characteristic polynomial $|W'P_zW - \alpha W'W| = 0$ for $W=[ \ r \ \  \Delta c \ ]$. The score test for testing the hypotheses in $\eqref{eis_hypothesis}$ is given by
+$$
+    S(\hat{\psi}_k) = \hat{u}_k'M_{\hat{(\Delta c)}_k}Z_2\left(Z_2'M_{\hat{(\Delta c)}_k}H_{\hat{u}_k}M_{\hat{(\Delta c)}_k}Z_2\right)^{-1}Z_2'M_{\hat{(\Delta c)}_k}\hat{u}_k. \tag{5} \label{score_statistic}
+$$
+where $\hat{u}_k = r - (\Delta c)\hat{\psi}$, $\hat{(\Delta c)}_k = Z\hat{\pi}_k$ for the appropriate first-stage estimator $\hat{\pi}_k$, $M_{\hat{(\Delta c)}_k} = I_{T} - \hat{(\Delta c)}_k\left[\hat{(\Delta c)}_k'\hat{(\Delta c)}_k\right]^{-1}\hat{(\Delta c)}_k'$, $Z_2$ are the overidentifying instruments, and $Z_2'M_{\hat{(\Delta c)}_k}H_{\hat{u}_k}M_{\hat{(\Delta c)}_k}Z_2/T$ is some variance estimator. The statistic $\eqref{score_statistic}$ nests numerous tests as special cases e.g. if $\psi$ is estimated via 2SLS and a homoskedastic variance estimator is used, then $\eqref{score_statistic}$ is the standard Sargan test. If some robust variance estimator is used, then estimating $\psi$ by 2SLS and LIML will give the Hansen $J$-test and $KP$-test respectively.
+
+## Worked example
+
+### Data
+
+The data used comes from Yogo (2004). This dataset consists of quarterly data on stock markets at the aggregate level, as well as macroeconomic variables from 11 countries: Australia (AUS), Canada (CAN), France (FRA), Germany (GER), Italy (ITA), Japan (JAP), Netherlands (NTH), Sweden (SWD), Switzerland (SWT), the United Kingdom (UK) and the United States of America (USA). The stock market data come from Morgan Stanley Capital International, and the consumption and interest rate data come from the International Financial Statistics of the International Monetary Fund.
+
+For illustrative purposes, let's suppose we want to estimate $\psi$ in $\eqref{eis_regression}$ and the hypothesis in $\eqref{eis_hypothesis}$ for the United States. First, load the UK data from the `USAQ.txt` file.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# 2) Set name of destination folder for zip file extraction
+data_folder_name <- "Data"
+
+# 3) Set output file name, INCLUDING '.xlsx' (can be left blank, default is 
+#    'tables.xlsx' if no output file name is given)
+output_file_name <- ""
+
+### ============================================================================
+### LOAD PACKAGES
+### ============================================================================
+
+packages <- c("dplyr", "lubridate", "readr", "expm", "openxlsx", "ivreg", "ivmodel")
+
+# Install package if currently installed, then load package
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+data_dir <- paste0("./", data_folder_name)
+
+# Extract list of text files
+text_files <- list.files(data_dir)
+text_file_count <- length(text_files)
+
+# Create table headers
+table_header <- c('Country', 'F', 'cv', '2SLS', 'LIML', 'J', 'KP')
+
+# Create tables
+create_table <- function() {
+  data.frame(Country = character(),
+             `2SLS` = numeric(),
+             LIML = numeric(),
+             J = numeric(),
+             KP = numeric(),
+             stringsAsFactors = FALSE)
+}
+
+table1 <- create_table()
+table2 <- create_table()
+
+table_number <- 1
+country_number <- 10
+
+# Load raw data from .csv file
+original_df <- read_csv(paste0("../../../Data/USAQ.txt"),
+                        col_names = FALSE, show_col_types = FALSE)
+
+column_name <- colnames(original_df)[1]
+new_column_names <- strsplit(as.character(original_df[1, 1]), "\t")[[1]]
+new_data <- list()
+
+# Clean text data to readable dataframe
+for (row in 2:nrow(original_df)) {
+  data_list <- strsplit(as.character(original_df[row, 1]), "\t")[[1]]
+  row_data <- setNames(data_list, new_column_names)
+  new_data <- append(new_data, list(row_data))
+}
+
+df <- bind_rows(new_data)
+df <- df[-c(1, 2), ]
+
+# Transform date and country name variables
+#   df[[new_column_names[1]]] <- as.Date(df[[new_column_names[1]]],
+#                                       format = "%Y.%m")
+
+df[new_column_names[-1]] <- lapply(df[new_column_names[-1]],
+                                   function(x) as.numeric(as.character(x),
+                                                          na.strings = "."))
+
+# Obtain country name for table from .txt file name
+country_name <- "Australia"
+```
+
+The head of the dataframe:
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+print(head(df))
+```
+
+```{r, echo=FALSE}
+df2 <- df %>%
+  mutate(across(where(is.numeric), ~round(., 3)))
+
+print(head(df2))
+```
+
+The outcome of interest and the endogenous regressor are `dc` (the rate of consumption growth) and `rrf` (the real interest rate) respectively. The variables `z1`, `z2`, `z3` and `z4` are the instruments, which are simply twice-lagged versions of the log dividend-price ratio (`dp`), the nominal interest rate (`r`), the inflation rate (`inf`) and the rate of consumption growth respectively. See Yogo (2004) or Lane and Windmeijer (2024) for a more detailed description.
+
+Define the variables from the dataframe `df`.
+
+```{r}
+X <- df[['dc']]                       # outcome of interest
+y <- df[['rrf']]                      # endogenous regressor
+Z <- df[c('z1', 'z2', 'z3', 'z4')]    # instrument matrix
+```
+
+The 2SLS and LIML estimators can be computed using the standard ```ivmodel``` package:
+
+```{r}
+iv_model <- ivmodel(Y = y, D = X, Z = Z)
+coefficients <- coef(iv_model)
+
+# Extract 2SLS estimator
+results_2sls <- coefficients["TSLS", ]
+beta_2sls <- results_2sls["Estimate"] 
+
+# Extract LIML estimator
+results_liml <- coefficients["LIML", ]
+beta_liml <- results_liml["Estimate"] 
+
+```
+```{r, echo=FALSE}
+cat(sprintf("2SLS estimate: %.2f, LIML estimate: %.2f\n", beta_2sls, beta_liml))
+```
+
+These estimates vary substantially - as we will see shortly, there is a severe weak-instrument problem in this specification. These parameter estimates can also be obtained from the `score_test()` function in the `oidrobust` package. We now compute the $J$- and $KP$-tests for assessing the validity of the overidentifying restrictions. We use the Newey-West variance estimator (Newey & West, 1987) with lags for estimating the variance term in the robust score test.
+
+```{r, echo=FALSE}
+lags <- 4
+```
+
+```{r}
+# J-test computations
+J_test <- score_test(y = y, X = X, Z = Z, method = "2sls",
+                     errors = "hac", lags = 6, no_constant = FALSE)
+
+# KP-test computations
+KP_test <- score_test(y = y, X = X, Z = Z, method = "liml",
+                      errors = "hac", lags = 6, no_constant = FALSE)
+```
+
+From here, we then obtain the parameter estimates and $J$- and $KP$-test statistics with
+
+```{r}
+### 2SLS-based ========================
+
+# 2SLS estimate
+beta_2sls <- J_test$coefficients
+
+# J-statistic value
+J <- J_test$statistic["score"]
+
+# J p-value
+J_p_val <- J_test$p.value
+
+### LIML-based ========================
+
+# LIML estimate
+beta_liml <- KP_test$coefficients
+
+# KP-statistic value
+KP <- KP_test$statistic["score"]
+
+# KP p-value
+KP_p_val <- KP_test$p.value
+```
+
+so collecting these estimates for the UK, and with the p-values in brackets, we find:
+
+```{r, echo=FALSE}
+cat(sprintf("%s| F: %.2f, cv: %.2f, 2SLS: %.2f, LIML: %.2f, J: %.2f (%.2f), KP: %.2f, (%.2f)\n", 
+            country_name, 2.68, 17.63, beta_2sls, beta_liml, J, J_p_val, KP, KP_p_val)
+    )
+```
+
+To see the effects of weak instruments, we also conduct an effective F-test and compute it's critical value. We see that the null of weak instruments cannot be rejected, and the statistic is in fact very low, indicating a potentially severe weak-instrument problem. It is clear that the $KP$-test does not reject the null hypothesis of valid instruments at the 5% level, whereas the $J$-test does. Given that the moment conditions in this model are *a priori* assumed valid, and that Lane and Windmeijer (2024) find that the $J$-test severely over-rejects the null under heteroskedastic weak instruments whereas the $KP$-test does not, we suggest that this is evidence of a false rejection of valid restrictions by the $J$-test rather than an incorrect failure to reject from the $KP$-test. 
+
+When we loop over both normalisations and all countries, we end up with the two tables: Table 1 estimates and tests the regression and hypotheses in $\eqref{eis_regression}$ and $\eqref{eis_hypothesis}$ respectively, and Table 2 estimates and tests the regression and hypotheses in $\eqref{crra_regression}$ and $\eqref{crra_hypothesis}$ respectively.
+
+```
+===================================================
+                      TABLE 1
+---------------------------------------------------
+        F      cv     2SLS    LIML      J      KP
+---------------------------------------------------
+AUS   19.18   18.40   0.05    0.03    8.78    8.89
+CAN   13.86   18.58  -0.30   -0.34    5.04    5.05
+FRA   41.97   19.31  -0.08   -0.08    0.45    0.45
+GER   13.37   18.32  -0.42   -0.44    2.59    2.54
+ITA   21.44   18.92  -0.07   -0.07    1.07    1.06
+JAP    5.44   21.29  -0.04   -0.05    4.73    4.73
+NTH   12.18   18.52  -0.15   -0.14    3.69    3.69
+SWD   21.19   18.76  -0.00   -0.00    2.59    2.59
+SWT    7.90   18.03  -0.49   -0.50    2.25    2.27
+UK     8.44   20.11   0.17    0.16    5.05    5.07
+USA    8.14   18.21   0.06    0.03    7.14    7.58
+---------------------------------------------------
+
+===================================================
+                      TABLE 2
+---------------------------------------------------
+        F      cv     2SLS    LIML      J      KP
+---------------------------------------------------
+AUS    2.47   19.49   0.50   30.03    9.49    8.89
+CAN    2.98   18.07  -1.04   -2.98    6.96    5.05
+FRA    0.22   19.67  -3.12  -12.38    2.08    0.45
+GER    1.13   18.59  -1.05   -2.29    3.16    2.54
+ITA    0.49   18.89  -3.34  -14.81    3.99    1.06
+JAP    1.98   17.89  -0.18  -21.56    8.42    4.73
+NTH    1.67   19.15  -0.53   -6.94    9.91    3.69
+SWD    0.87   17.28  -0.10  -399.86  13.28    2.59
+SWT    1.58   19.85  -1.56   -2.00    2.92    2.27
+UK     2.68   17.62   1.06    6.21    8.17    5.07
+USA    2.65   17.61   0.68   34.11    9.84    7.58
+---------------------------------------------------
+```
+
+noting that the 95% critical value of the $\chi^2_{0.95}(3)=7.82$, where $\chi^2_{1-\alpha}(\ell)$ is the $100(1-\alpha)$% critical value of the $\chi^2$ distribution with $\ell$ degrees of freedom.
+
+
+

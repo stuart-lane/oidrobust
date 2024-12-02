@@ -1,0 +1,11 @@
+Package: oidtest
+Type: Package
+Title: Package for Overidentification testing
+Version: 0.1.0
+Author: Stuart Lane (stuart.lane@bristol.ac.uk)
+Maintainer: Stuart Lane (stuart.lane@bristol.ac.uk)
+Description: This package implements the score test for overidentification testing in linear instrumental variables models, including a range of options for robust variance-covariance estimation.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: expm, Formula, MASS

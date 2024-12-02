@@ -1,0 +1,4 @@
+export(score_test)
+importFrom(expm, sqrtm)
+importFrom(Formula, as.Formula, model.frame, model.matrix)
+importFrom(MASS, ginv)
