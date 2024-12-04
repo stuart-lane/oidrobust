@@ -17,7 +17,7 @@ setwd("C:/Users/sl14120/OneDrive - University of Bristol/score_test/R/vignettes"
 
 ```{r message=FALSE, warning=FALSE}
 library(ivmodel)
-source("../R/score_test.R")
+library(oidrobust)
 ```
 
 ## 1 &nbsp;&nbsp;&nbsp; Introduction
@@ -234,6 +234,3 @@ noting that the 95% critical value of the $\chi^2_{0.95}(3)=7.82$, where $\chi^2
 In Table 1, we see that the $J$ and $KP$-tests agree on whether to reject the null in each of the 11 specifications considered. Both tests reject the null hypothesis at the conventional 5% level for Australia, but fail to find sufficient evidence to reject the null at this level for all other specifications. Although a number of these specifications fail to reject the null of weak instruments, the effective $F$-statistics are broadly large enough to likely conclude that the instruments have some explanatory power, although there may be some small weak-instrument bias. Overall, these results are consistent with the *a priori* belief that the instruments should be valid in this model, and the one rejection in 11 specifications is consistent with a 5% false rejection frequency.
 
 In Table 2 however, we see that instruments are much weaker. The $J$-test rejects in 6 of the 11 specifications, but the $KP$-test continues to reject in just one specification (on inspection, one notes that for each country, the LIML estimates in Table 1 and Table 2 are exact inverses on each other and the $KP$-statistic is equivalent, but this is not the case for 2SLS and $J$). This is important for a couple of reasons. Firstly, we have good *a priori* reasons to believe that the instruments are valid. Lane and Windmeijer (2024) demonstrate that the $J$-test can suffer from a severe over-rejection problem with heteroskedastic weak instruments, something that is not found with the $KP$-test. Given that either the instruments tested in Tables 1 and 2 are equivalent up to linear transformations, and therefore validity in one normalisation implies validity in the other, it is likely that the results from Table 1 are more likely accurate, and Table 2 instead shows a large number of false rejections from the $J$-test.
-
-
-

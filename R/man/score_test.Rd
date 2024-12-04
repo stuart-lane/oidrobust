@@ -116,10 +116,10 @@ score_test(wage ~ educ | exper + city,
 }
 \references{
 \itemize{
-\item Hansen, L. P. (1982). Large sample properties of generalized method of moments estimators. Econometrica, 1029-1054.
-\item Sargan, J. D. (1958). The estimation of economic relationships using instrumental variables. Econometrica, 393-415.
-\item Kleibergen, F., & Paap, R. (2006). Generalized reduced rank tests using the singular value decomposition. Journal of Econometrics, 133(1), 97-126.
-\item Windmeijer, F. (2024). Testing underidentification in linear models, with applications to dynamic panel and asset pricing models. Journal of Econometrics, (240), 105104.
-\item Lane, S., & Windmeijer, F. Working Paper. Overidentification testing with weak instruments and heteroskedasticity.
+\item Sargan, J. D. (1958). The estimation of economic relationships using instrumental variables.
+\item Hansen, L. P. (1982). Large sample properties of generalized method of moments estimators.
+\item Kleibergen, F., & Paap, R. (2006). Generalized reduced rank tests using the singular value decomposition.
+\item Windmeijer, F. (2021). Two-stage least squares as a score test.
+\item Lane, S., & Windmeijer, F. (2024). Robust overidentification testing in linear IV models.
 }
 }
