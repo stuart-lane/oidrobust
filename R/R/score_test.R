@@ -103,26 +103,8 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
     if (!inherits(formula, "formula")) {
       stop("formula must be a valid R formula object")
     }
-    if (is.null(data)) {
-      stop("Data must be provided when using formula")
-    }
-    if (!is.data.frame(data)) {
-      stop("data must be a data frame")
-    }
-    
-    if (!is.null(no_constant) && no_constant) {
-      # Check if formula already has no constant specification
-      has_no_constant <- attr(terms(formula), "intercept") == 0
-      if (!has_no_constant) {
-        # Convert formula to character and add -1 to both parts
-        formula_str <- Reduce(paste, deparse(formula))
-        parts <- strsplit(formula_str, "\\|")[[1]]
-        new_formula <- paste(paste(parts[1], "-1"), "|", paste(parts[2], "-1"))
-        formula <- Formula::as.Formula(new_formula)
-        
-        # Print message to inform user
-        message("Added -1 to formula to remove constant term")
-      }
+    if (is.null(data) || !is.data.frame(data)) {
+      stop("data must be a provided data frame")
     }
     
     formula <- Formula::as.Formula(formula)
@@ -132,24 +114,33 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
     
     mf <- model.frame(formula, data)
     y <- model.response(mf)
-    X <- model.matrix(formula, data = mf, rhs = 1)
-    Z <- model.matrix(formula, data = mf, rhs = 2)
     
-    if (ncol(Z) - ncol (X) < 1) {
-      stop("Model must be overidentified to conduct test")
-    }
+    ## NEW ATTTEMPT:
     
-    endog_vars <- setdiff(colnames(X), colnames(Z))
+    X <- model.matrix(formula, data = mf, rhs = 1, intercept = TRUE)  
+    Z <- model.matrix(formula, data = mf, rhs = 2, intercept = TRUE)  
+    
+    # Store constant
+    constant <- X[, "(Intercept)", drop = FALSE]
+    
+    # Remove intercept from both
+    X <- X[, -1, drop = FALSE]
+    Z <- Z[, -1, drop = FALSE]
+    
+    # Find included exogenous variables
     exog_vars <- intersect(colnames(X), colnames(Z))
     
-    X <- cbind(X[, endog_vars, drop = FALSE], X[, exog_vars, drop = FALSE])
-    W <- X[, exog_vars, drop = FALSE]
+    # W gets exogenous variables and constant
+    W <- cbind(constant, X[, exog_vars, drop = FALSE])
+    
+    # Remove exogenous from X and Z
+    X <- X[, setdiff(colnames(X), exog_vars), drop = FALSE]
+    Z <- Z[, setdiff(colnames(Z), exog_vars), drop = FALSE]
     
     if (!is.null(cluster_var)) {
       if (!cluster_var %in% colnames(data)) stop("Cluster variable not found in data")
       cluster_var <- data[[cluster_var]]
     }
-    
   } else {
     
     if (is.null(y) || is.null(X) || is.null(Z)) {
