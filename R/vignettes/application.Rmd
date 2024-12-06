@@ -89,7 +89,7 @@ For illustrative purposes, let's suppose we want to estimate $\psi$ in $\eqref{e
 df <- read_csv("../../Data/AUSQ.txt", col_names = TRUE, show_col_types = FALSE)
 ```
 
-The head of the dataframe is:
+Let's get an overview of the dataframe by printing the head:
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
 print(head(df))
@@ -129,7 +129,7 @@ psi_liml <- results_liml["Estimate"]
 # Print the coefficents
 cat(sprintf("2SLS estimate: %.2f, LIML estimate: %.2f\n", psi_2sls, psi_liml))
 ```
-We can also compute the 2SLS and LIML estimators, as well as the $J$- and $KP$-tests for validity of the overidentifying restrictions using the `score_test()` function in the `oidrobust` package. Here, we use the Newey-West heteroskedasticity and autocorrelation robust variance estimator (Newey & West, 1987) with 4 lags, although various types of variance estimator are available (see documentation). The tests can be implemented using custom matrices:
+We can also compute the 2SLS and LIML estimators, as well as the $J$- and $KP$-tests for validity of the overidentifying restrictions using the `score_test()` function in the `oidrobust` package. Here, we use the Newey-West heteroskedasticity and autocorrelation robust variance estimator (Newey & West, 1987) with 4 lags, although various types of variance estimator are available (see documentation). The tests can be implemented using user-defined matrices:
 
 ```{r}
 # Implementation of test statistics using matrices
@@ -171,24 +171,24 @@ From here, we then obtain the parameter estimates $\hat{\psi}_{2SLS}$ and $\hat{
 ```{r}
 ### 2SLS-based ========================
 
-# 2SLS estimate
+# Extract 2SLS estimate
 psi_2sls <- J_test$coefficients
 
-# J-statistic value
+# Extract J-statistic value
 J <- J_test$statistic["score"]
 
-# J p-value
+# Extract J p-value
 J_p_val <- J_test$p.value
 
 ### LIML-based ========================
 
-# LIML estimate
+# Extract LIML estimate
 psi_liml <- KP_test$coefficients
 
-# KP-statistic value
+# Extract KP-statistic value
 KP <- KP_test$statistic["score"]
 
-# KP p-value
+# Extract KP p-value
 KP_p_val <- KP_test$p.value
 ```
 
@@ -198,13 +198,12 @@ so collecting these estimates for Australia, and with the p-values in brackets, 
 country_name <- "Australia"
 
 cat(sprintf("%s| F: %.2f, cv: %.2f, 2SLS: %.2f, LIML: %.2f, J: %.2f (%.2f), KP: %.2f, (%.2f)\n", 
-            country_name, 2.68, 17.63, psi_2sls, psi_liml, J, J_p_val, KP, KP_p_val)
+            country_name, 19.18, 18.40, psi_2sls, psi_liml, J, J_p_val, KP, KP_p_val)
     )
 ```
+To see the effects of weak instruments, we also conduct an effective $F$-test and compute it's critical value (both values are pre-calculated here; see the replication files of Lane & Windmeijer (2024) for code to reproduce these). We see that the null of weak instruments cannot be rejected, and the statistic is in fact very low, indicating a potentially severe weak-instrument problem. It is clear that the $KP$-test does not reject the null hypothesis of valid instruments at the 5% level, whereas the $J$-test does. Given that the moment conditions in this model are *a priori* assumed valid, and that Lane and Windmeijer (2024) find that the $J$-test severely over-rejects the null under heteroskedastic weak instruments whereas the $KP$-test does not, we suggest that this is evidence of a false rejection of valid restrictions by the $J$-test rather than an incorrect failure to reject from the $KP$-test. 
 
-To see the effects of weak instruments, we also conduct an effective $F$-test and compute it's critical value. We see that the null of weak instruments cannot be rejected, and the statistic is in fact very low, indicating a potentially severe weak-instrument problem. It is clear that the $KP$-test does not reject the null hypothesis of valid instruments at the 5% level, whereas the $J$-test does. Given that the moment conditions in this model are *a priori* assumed valid, and that Lane and Windmeijer (2024) find that the $J$-test severely over-rejects the null under heteroskedastic weak instruments whereas the $KP$-test does not, we suggest that this is evidence of a false rejection of valid restrictions by the $J$-test rather than an incorrect failure to reject from the $KP$-test. 
-
-When we loop over both normalisations and all countries, we end up with the two tables: Table 1 estimates and tests the regression and hypotheses in $\eqref{eis_regression}$ and $\eqref{eis_hypothesis}$ respectively, and Table 2 estimates and tests the regression and hypotheses in $\eqref{crra_regression}$ and $\eqref{crra_hypothesis}$ respectively (note that the 95% critical value is $7.82$ for the $\chi^2_{0.95}(3)$ distribution, where $\chi^2_{1-\alpha}(\ell)$ is the $100(1-\alpha)$% critical value of the $\chi^2$ distribution with $\ell$ degrees of freedom).
+When we loop over both normalisations and all countries, we end up with the two tables: Table 1 estimates and tests the regression and hypotheses in $\eqref{eis_regression}$ and $\eqref{eis_hypothesis}$ respectively, and Table 2 estimates and tests the regression and hypotheses in $\eqref{crra_regression}$ and $\eqref{crra_hypothesis}$ respectively (note that the 95% critical value is $7.82$ for the $\chi^2_{0.95}(3)$ distribution, where $\chi^2_{1-\alpha}(\lambda)$ is the $100(1-\alpha)$% critical value of the $\chi^2$-distribution with $\lambda$ degrees of freedom).
 
 ```
 ===================================================
@@ -242,6 +241,24 @@ SWT    1.58   19.85  -1.56   -2.00    2.92    2.27
 UK     2.68   17.62   1.06    6.21    8.17    5.07
 USA    2.65   17.61   0.68   34.11    9.84    7.58
 ---------------------------------------------------
+```
+
+If the user wants to see the critical value in the general case, then they can run
+
+```{r}
+# Obtain degrees of freedom
+dof <- J_test$parameter["dof"]
+
+# or equivalently
+dof <- KP_test$parameter["dof"]
+
+# and then compute the 1 - alpha (e.g. alpha = 0.05) critical value as
+alpha = 0.05
+
+critical_value <- qchisq(1 - alpha, df = dof)
+
+sprintf("%.0f%% critical value of chi-squared distribution with %.0f degrees of freedom : %.3f",
+        (1 - alpha) *100, dof, critical_value)
 ```
 
 ### 3.2 &nbsp;&nbsp;&nbsp; Interpretation of results
