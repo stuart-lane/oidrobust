@@ -10,5 +10,5 @@ Install from CRAN:
 Or install the development version from GitHub:
 ```r
 # install.packages("devtools")
-devtools::install_github("myusername/oidrobust", subdir="R")
+devtools::install_github("stuart-lane/oidrobust", subdir="R")
 ```
