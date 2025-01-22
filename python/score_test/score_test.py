@@ -27,13 +27,23 @@ class TestResults:
     coefficients: np.ndarray
     method: str
 
+    @property
+    def coef_str(self) -> str:
+        """Return formatted coefficient string"""
+        if self.coefficients.shape[0] == 1:
+            return f"{self.coefficients[0][0]:.3f}"
+        else:
+            coefs = [f"{val[0]:.3f}" for i, val in enumerate(self.coefficients)]
+            return f"({', '.join(coefs)})"
+
     def __str__(self) -> str:
         return (
             f"Overidentification test results\n"
             f"-------------------------------\n"
             f"Method: {self.method}\n"
-            f"Statistic: {self.statistic}\n"
-            f"p-value: {self.p_value}\n"
+            f"Coefficients: {self.coef_str}\n"
+            f"Statistic: {self.statistic:.3f}\n"
+            f"p-value: {self.p_value:.3f}\n"
             f"Degrees of freedom: {self.df}\n"
         )
     
@@ -42,6 +52,7 @@ class VarianceEstimator:
 
     def compute(self, residuals: np.ndarray, MXZ2: np.ndarray, **kwargs) -> np.ndarray:
         raise NotImplementedError
+
 
 class ScoreTest:
     """Class for conducting overidentifcation tests in linear IV models"""
@@ -53,6 +64,7 @@ class ScoreTest:
             "hac": NeweyWestVarianceEstimator(),
             "cluster": ClusterVariance()
         }
+
 
     def _prepare_data(self,
                     y: Optional[np.ndarray] = None,
@@ -99,6 +111,7 @@ class ScoreTest:
 
         return y, X, Z, W
 
+
     def _partial_out(self, y: np.ndarray, X: np.ndarray, Z: np.ndarray,
                     W = Optional[np.ndarray]) -> tuple:
         """Partial out any exogenous regressors, including constant"""
@@ -110,6 +123,7 @@ class ScoreTest:
             Z = M_W @ Z
         return y, X, Z
         
+
     def score_test(self,
                     formula: Optional[str] = None,
                     data: Optional[pd.DataFrame] = None,
