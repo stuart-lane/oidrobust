@@ -173,7 +173,7 @@ class ScoreTest:
             Use Basmann version of the test statistic
             Default is False
         lags : str or int, optional
-            Number of lags for HAC variance estimator ('rot', 'plug-in' or user-specified positive integer)
+            Number of lags for HAC variance estimator ('rot', 'plug-in' or user-specified non-negative integer)
             Default is 'rot'
         cluser_var : array_like, optional
             Clustering variable for cluster variance estimator
