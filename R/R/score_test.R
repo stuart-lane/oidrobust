@@ -3,7 +3,7 @@
 #' @description
 #' Implements various overidentification tests including the Sargan test,
 #' Hansen J-test, and Kleibergen-Paap test for linear IV models. This function
-#' implements the score test discussed in Windmeijer (2022) and Lane and Windmeijer (2024).
+#' implements the score test discussed in Windmeijer (2021) and Lane and Windmeijer (2025).
 #' 
 #' @param formula An object of class \code{formula} describing the IV regression model.
 #'   Should include two parts separated by \code{|}, where the left part specifies
@@ -79,11 +79,12 @@
 #' 
 #' @references
 #' \itemize{
-#'   \item Sargan, J. D. (1958). The estimation of economic relationships using instrumental variables.
-#'   \item Hansen, L. P. (1982). Large sample properties of generalized method of moments estimators.
-#'   \item Kleibergen, F., & Paap, R. (2006). Generalized reduced rank tests using the singular value decomposition.
-#'   \item Windmeijer, F. (2021). Two-stage least squares as a score test.
-#'   \item Lane, S., & Windmeijer, F. (2024). Robust overidentification testing in linear IV models.
+#'   \item Hansen, L. P. (1982). Large sample properties of generalized method of moments estimators. Econometrica, 1029-1054.
+#'   \item Kleibergen, F., & Paap, R. (2006). Generalized reduced rank tests using the singular value decomposition. Journal of Econometrics, 133(1), 97-126.
+#'   \item Lane, S., & Windmeijer, F. (2025). Overidentification testing with weak instruments and heteroskedasticity. Working paper
+#'   \item Newey, W. K., & West, K. D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. Econometrica, 55(3), 703–708.
+#'   \item Sargan, J. D. (1958). The estimation of economic relationships using instrumental variables. Econometrica, 393-415.
+#'   \item Windmeijer, F. (2021). Testing underidentification in linear models, with applications to dynamic panel and asset pricing models. Journal of Econometrics, 105104.
 #' }
 #' 
 #' @importFrom Formula as.Formula
@@ -92,7 +93,7 @@
 #' 
 #' @export
 ### ============================================================================
-### NEW SCORE TEST FUNCTION
+### SCORE TEST FUNCTION
 ### ============================================================================
 
 score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL, W = NULL, 
@@ -115,25 +116,18 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
     mf <- model.frame(formula, data)
     y <- model.response(mf)
     
-    ## NEW ATTTEMPT:
-    
     X <- model.matrix(formula, data = mf, rhs = 1, intercept = TRUE)  
     Z <- model.matrix(formula, data = mf, rhs = 2, intercept = TRUE)  
     
-    # Store constant
     constant <- X[, "(Intercept)", drop = FALSE]
     
-    # Remove intercept from both
     X <- X[, -1, drop = FALSE]
     Z <- Z[, -1, drop = FALSE]
     
-    # Find included exogenous variables
     exog_vars <- intersect(colnames(X), colnames(Z))
     
-    # W gets exogenous variables and constant
     W <- cbind(constant, X[, exog_vars, drop = FALSE])
     
-    # Remove exogenous from X and Z
     X <- X[, setdiff(colnames(X), exog_vars), drop = FALSE]
     Z <- Z[, setdiff(colnames(Z), exog_vars), drop = FALSE]
     
