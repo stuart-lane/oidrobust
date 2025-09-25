@@ -1,3 +1,7 @@
+%%% ATTRIBUTION:
+% Full credit for this function belongs to Guillaume Nolin
+% Available at https://uk.mathworks.com/matlabcentral/fileexchange/41275-newey-west-standard-errors
+
 function nwse = NeweyWest(e,X,L,constant)
 % PURPOSE: computes Newey-West adjusted heteroscedastic-serial
 %          consistent standard errors
@@ -60,8 +64,6 @@ for l = 0:L
     end
 end
 Q = (1/(N-k)) .*Q;
-
-nwse = sqrt(diag(N.*((X'*X)\Q/(X'*X))));
 
 nwse = (N-k)*Q;
 
