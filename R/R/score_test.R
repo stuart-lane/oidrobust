@@ -100,6 +100,8 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
                        weights = NULL, method = "2sls", errors = "hom", basmann = FALSE,
                        lags = "rot", cluster_var = NULL, small_sample = FALSE, no_constant = NULL) {
   
+  ## DATA PROCESSING ===========================================================
+  
   if (!is.null(formula)) {
     if (!inherits(formula, "formula")) {
       stop("formula must be a valid R formula object")
@@ -161,6 +163,8 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
     
   }
   
+  # WEIGHTING AND PARTIALLING OUT EXOGENOUS VARIABLES ==========================
+  
   Z <- Z[, !duplicated(t(Z)), drop = FALSE]
   
   if (!is.null(weights)) {
@@ -191,6 +195,8 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
   
   pi_hat <- solve(t(Z) %*% Z) %*% t(Z) %*% X
   X_hat <- Z %*% pi_hat
+  
+  ## COMPUTE M_X_HAT ===========================================================
   
   if (method == "2sls") {
     
@@ -224,12 +230,16 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
   
   MXZ2 <- M_X_hat %*% Z2
   
+  ## COMPUTE RESIDUALS =========================================================
+  
   if (!basmann) {
     residuals <- u_hat
   } else {
     MZ = diag(n) - (Z %*% solve(t(Z) %*% Z) %*% t(Z))
     residuals <- (MZ %*% y) - (MZ %*% X) %*% beta_hat
   }
+  
+  ## COMPUTE SCORE TEST ========================================================
   
   if (errors == "hom") {
     
@@ -306,6 +316,8 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
   }
   
   p_value <- 1 - pchisq(score_stat, dof)
+  
+  ## PRINT RESULTS =============================================================
   
   test_statistic <- 
     if (method == "2sls") {

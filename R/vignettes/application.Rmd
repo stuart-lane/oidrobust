@@ -2,7 +2,7 @@
 title: "Overidentification testing with weak instruments and heteroskedasticity"
 author: "Stuart Lane"
 date: "`r Sys.Date()`"
-output: html_document
+output: github_document
 ---
 
 ## Overview
@@ -17,6 +17,7 @@ setwd("C:/Users/sl14120/OneDrive - University of Bristol/oidrobust/R/vignettes")
 
 ```{r message=FALSE, warning=FALSE}
 # New package for robust overidentification testing
+devtools::install_github("stuart-lane/oidrobust", subdir="R")
 library(oidrobust)
 
 # Standard package used for IV estimation
@@ -273,7 +274,7 @@ Hansen, L. P. (1982). Large sample properties of generalized method of moments e
 
 Kleibergen, F., & Paap, R. (2006). Generalized reduced rank tests using the singular value decomposition. *Journal of Econometrics*, 133(1), 97-126.
 
-Lane, S., & Windmeijer, F. (2025). Robust overidentification testing in linear IV models. Working paper
+Lane, S., & Windmeijer, F. (2025). Overidentification testing with weak instruments and heteroskedasticity. Working paper
 
 Newey, W. K., & West, K. D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. *Econometrica*, 55(3), 703–708.
 
