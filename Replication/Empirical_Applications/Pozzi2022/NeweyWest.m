@@ -1,4 +1,4 @@
-%%% ATTRIBUTION:
+% ATTRIBUTION:
 % Full credit for this function belongs to Guillaume Nolin
 % Available at https://uk.mathworks.com/matlabcentral/fileexchange/41275-newey-west-standard-errors
 
