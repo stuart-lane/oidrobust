@@ -18,3 +18,7 @@ Install the python development version from GitHub:
 ```python
 pip install git+https://github.com/stuart-lane/oidrobust.git#subdirectory=Python
 ```
+
+ ## ⚠️ Development Status
+ 
+This package is in early development and has not undergone extensive testing. While we believe the implementation is correct, bugs may exist. Use with caution and please report any issues.
