@@ -5,9 +5,6 @@ The `oidrobust` package provides facilities for robust overidentification testin
 
 ### R
 
-Install from CRAN:
-```install.packages("oidrobust")```
-
 Install the R development version from GitHub:
 ```r
 # install.packages("devtools")
