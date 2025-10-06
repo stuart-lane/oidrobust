@@ -4,22 +4,33 @@ Utility functions and classes for overidentification testing
 
 import numpy as np
 from scipy.linalg import sqrtm
-from typing import Optional, Union, Dict, Any
+from typing import Union
 
 """
 Functions for parameterr estimation
 """
 
-def compute_2sls(y: np.ndarray, X: np.ndarray, Z: np.ndarray) -> tuple:
+def compute_2sls(
+        y: np.ndarray, 
+        X: np.ndarray, 
+        Z: np.ndarray
+    ) -> tuple:
+
     """Compute the 2SLS estimator"""
     pi_hat = np.linalg.pinv(Z.T @ Z) @ (Z.T @ X)
     X_hat = Z @ pi_hat
     beta_hat = np.linalg.pinv(X_hat.T @ X_hat) @ (X_hat.T @ y)
     u_hat = y - X @ beta_hat
     M_X_hat = np.eye(len(y)) - X_hat @ np.linalg.pinv(X_hat.T @ X_hat) @ X_hat.T
+
     return beta_hat, u_hat, M_X_hat
         
-def compute_liml(y: np.ndarray, X: np.ndarray, Z: np.ndarray) -> tuple:
+def compute_liml(
+        y: np.ndarray, 
+        X: np.ndarray, 
+        Z: np.ndarray
+    ) -> tuple:
+
     """Compute the LIML estimator"""
     n = len(y)
     Y = np.column_stack([y, X])
@@ -47,14 +58,25 @@ Classes of variance estimator
 class VarianceEstimator:
     """Standard variance covariance matrix estimator"""
 
-    def compute(self, residuals: np.ndarray, MXZ2: np.ndarray, **kwargs) -> np.ndarray:
+    def compute(
+            self, 
+            residuals: np.ndarray, 
+            MXZ2: np.ndarray, 
+            **kwargs
+        ) -> np.ndarray:
         raise NotImplementedError
 
 
 class HomoskedasticVariance(VarianceEstimator):
     """Homoskedastic variance estimator"""
 
-    def compute(self, residuals: np.ndarray, MXZ2: np.ndarray, **kwargs) -> np.ndarray:
+    def compute(
+            self, 
+            residuals: np.ndarray, 
+            MXZ2: np.ndarray, 
+            **kwargs
+        )-> np.ndarray:
+
         n = len(residuals)
         sigma2_hat = np.sum(residuals ** 2) / n
         return (MXZ2.T @ MXZ2) * sigma2_hat
@@ -63,7 +85,13 @@ class HomoskedasticVariance(VarianceEstimator):
 class HeteroskedasticVariance(VarianceEstimator):
     """White heteroskedasticity-robust variance estimator"""
 
-    def compute(self, residuals: np.ndarray, MXZ2: np.ndarray, **kwargs) -> np.ndarray:
+    def compute(
+            self, 
+            residuals: np.ndarray, 
+            MXZ2: np.ndarray, 
+            **kwargs
+        ) -> np.ndarray:
+
         residuals2 = residuals ** 2
         return MXZ2.T @ np.diag(residuals2.flatten()) @ MXZ2
 
@@ -71,7 +99,13 @@ class HeteroskedasticVariance(VarianceEstimator):
 class NeweyWestVarianceEstimator(VarianceEstimator):
     """Newey-West Heteroskedasticity and autocorrelation robust variance estimator"""
 
-    def _get_lag_length(self, n: int, method: str) -> int:
+    def _get_lag_length(
+            self, 
+            n: int, 
+            method: str
+        ) -> int:
+        """Lags for Newey-West variance estimator"""
+
         if method == "rot":
             return int(4 * (n / 100) ** (2 / 9))
         elif method == "plug-in":
@@ -82,8 +116,15 @@ class NeweyWestVarianceEstimator(VarianceEstimator):
             except ValueError:
                 raise ValueError("Please enter 'rot', 'plug-in' or a positive integer for the `lags` argument")
 
-    def compute(self, residuals: np.ndarray, MXZ2: np.ndarray,
-                lags: Union[str, int] = "rot", **kwargs) -> np.ndarray:
+    def compute(
+            self, 
+            residuals: np.ndarray, 
+            MXZ2: np.ndarray,
+            lags: Union[str, int] = "rot", 
+            **kwargs
+        ) -> np.ndarray:
+        """Compute the variance estimator"""
+
         n = len(residuals)
         V = MXZ2.T @ np.diag(residuals.flatten() ** 2) @ MXZ2
         L = self._get_lag_length(n, lags)
@@ -101,8 +142,14 @@ class NeweyWestVarianceEstimator(VarianceEstimator):
 class ClusterVariance(VarianceEstimator):
     """Cluster robust variance estimator"""
 
-    def compute(self, residuals: np.ndarray, MXZ2: np.ndarray,
-                cluster_var: np.ndarray, **kwargs) -> np.ndarray:
+    def compute(
+            self, 
+            residuals: np.ndarray, 
+            MXZ2: np.ndarray,
+            cluster_var: np.ndarray, 
+            **kwargs
+        ) -> np.ndarray:
+
         if cluster_var is None:
             raise ValueError("Cluster variable must be provided for cluster-robust variance errors")
 
@@ -119,4 +166,5 @@ class ClusterVariance(VarianceEstimator):
             V += MXZ2_c.T @ residuals_c @ residuals_c.T @ MXZ2_c
 
         V += V * n_clusters / (n_clusters - 1)
+        
         return V

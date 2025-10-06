@@ -3,11 +3,9 @@ Package for overidentification testing in linear IV models
 """
 
 import numpy as np
-from scipy import stats, linalg
-from scipy.linalg import sqrtm
 import pandas as pd
-from patsy import dmatrices
-from typing import Optional, Union, Dict, Any
+from scipy import stats
+from typing import Optional, Union
 from dataclasses import dataclass
 from utils import (
     HomoskedasticVariance,
@@ -67,12 +65,13 @@ class ScoreTest:
 
 
     def _prepare_data(self,
-                    y: Optional[np.ndarray] = None,
-                    X: Optional[np.ndarray] = None,
-                    Z: Optional[np.ndarray] = None,
-                    W: Optional[np.ndarray] = None,
-                    weights: Optional[np.ndarray] = None,
-                    no_constant: bool = False) -> tuple:
+            y: Optional[np.ndarray] = None,
+            X: Optional[np.ndarray] = None,
+            Z: Optional[np.ndarray] = None,
+            W: Optional[np.ndarray] = None,
+            weights: Optional[np.ndarray] = None,
+            no_constant: bool = False
+        ) -> tuple:
         """
         Prepare data for overidentification testing.
         """
@@ -112,8 +111,14 @@ class ScoreTest:
         return y, X, Z, W
 
 
-    def _partial_out(self, y: np.ndarray, X: np.ndarray, Z: np.ndarray,
-                    W = Optional[np.ndarray]) -> tuple:
+    def _partial_out(
+            self, 
+            y: np.ndarray, 
+            X: np.ndarray, 
+            Z: np.ndarray,
+            W: Optional[np.ndarray] = None
+        )-> tuple:
+
         """Partial out any exogenous regressors, including constant"""
         if W is not None:
             Q_W = np.linalg.qr(W)[0]
@@ -125,20 +130,21 @@ class ScoreTest:
         
 
     def score_test(self,
-                    formula: Optional[str] = None,
-                    data: Optional[pd.DataFrame] = None,
-                    y: Optional[np.ndarray] = None,
-                    X: Optional[np.ndarray] = None,
-                    Z: Optional[np.ndarray] = None,
-                    W: Optional[np.ndarray] = None,
-                    weights: Optional[np.ndarray] = None,
-                    method: str = "2sls",
-                    errors: str = "hom",
-                    basmann: bool = False,
-                    lags: Union[str, int] = "rot",
-                    cluster_var: Optional[np.ndarray] = None,
-                    small_sample: bool = False,
-                    no_constant: bool = False) -> TestResults:
+            formula: Optional[str] = None,
+            data: Optional[pd.DataFrame] = None,
+            y: Optional[np.ndarray] = None,
+            X: Optional[np.ndarray] = None,
+            Z: Optional[np.ndarray] = None,
+            W: Optional[np.ndarray] = None,
+            weights: Optional[np.ndarray] = None,
+            method: str = "2sls",
+            errors: str = "hom",
+            basmann: bool = False,
+            lags: Union[str, int] = "rot",
+            cluster_var: Optional[np.ndarray] = None,
+            small_sample: bool = False,
+            no_constant: bool = False
+        ) -> TestResults:
 
         """Conduct overidentification test in linear IV models
         
@@ -222,7 +228,7 @@ class ScoreTest:
         if not basmann:
             residuals = u_hat
         else:
-            MZ = np.eye(n) - Z @ np.linalg.pin(Z.T @ Z) @ Z.T
+            MZ = np.eye(n) - Z @ np.linalg.pinv(Z.T @ Z) @ Z.T
             residuals = MZ @ y - MZ @ (X @ beta_hat)
 
         variance_matrix = self.variance_estimators.get(errors.lower())

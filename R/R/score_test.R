@@ -50,7 +50,7 @@
 #' @details
 #' The function implements overidentification tests that allow users to assess 
 #' instrument validity when the number of instruments exceeds the number of 
-#' endogenous regressors. It supports both traditional (Sargan) and robust 
+#' endogenous regressors. It supports both homoskedastic (Sargan) and robust 
 #' (Hansen J, Kleibergen-Paap) test statistics.
 #' 
 #' The test statistic follows a chi-square distribution under the null hypothesis

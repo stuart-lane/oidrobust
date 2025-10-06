@@ -8,7 +8,7 @@ setup(
     version="0.1.0",
     author="Stuart Lane",
     author_email="stuart.lane@bristol.ac.uk",
-    description="Robust overidentification testing for linear IV models",
+    description="A package for robust overidentification testing in linear IV models.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/stuart-lane/oidrobust",
