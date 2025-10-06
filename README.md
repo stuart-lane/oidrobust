@@ -9,9 +9,13 @@ A package for robust overidentification testing in linear IV models, currently a
 Install from CRAN:
 ```install.packages("oidrobust")```
 
-Or install the development version from GitHub:
+Install the R development version from GitHub:
 ```r
 # install.packages("devtools")
 devtools::install_github("stuart-lane/oidrobust", subdir="R")
 ```
 ### Python
+Install the python development version from GitHub:
+```python
+pip install git+https://github.com/stuart-lane/oidrobust.git#subdirectory=Python
+```
