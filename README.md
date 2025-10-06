@@ -21,4 +21,4 @@ pip install git+https://github.com/stuart-lane/oidrobust.git#subdirectory=Python
 
  ## ⚠️ Development Status
  
-This package is in early development and has not undergone extensive testing. While we believe the implementation is correct, bugs may exist. Use with caution and please report any issues.
+This package is in the late stages of development, but has not undergone extensive testing. While I believe the implementation is correct, bugs may exist. Use with caution and please report any issues.
