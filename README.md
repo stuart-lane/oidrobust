@@ -1,5 +1,5 @@
 # oidrobust
-The `oidrobust` package provides facilities for robust overidentification testing in linear IV models, currently available in R and python. Also, MATLAB files are available to replicate the simulations and empirical applications:
+The `oidrobust` package provides facilities for robust overidentification testing in linear IV models, currently available in R and python. Also, MATLAB files are available to replicate the simulations and empirical applications in:
 
 Lane, S., & Windmeijer, F. (2025). Overidentification testing with weak instruments and heteroskedasticity. arXiv preprint arXiv:2509.21096.
 
@@ -19,5 +19,9 @@ pip install git+https://github.com/stuart-lane/oidrobust.git#subdirectory=Python
 ```
 
  ## ⚠️ Development Status
+
+ Current version: 0.1.0 (pre-release)
  
-This package is in the late stages of development, but has not undergone extensive testing. While I believe the implementation is correct, bugs may exist. Use with caution and please report any issues.
+This package is in the late stages of development, but has not undergone extensive testing. While I believe the implementation is correct, bugs may exist. Use with caution and please report any issues!
+
+
