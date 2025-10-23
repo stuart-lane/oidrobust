@@ -98,7 +98,7 @@
 
 score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL, W = NULL, 
                        weights = NULL, method = "2sls", errors = "hom", basmann = FALSE,
-                       lags = "rot", cluster_var = NULL, small_sample = FALSE, no_constant = NULL) {
+                       lags = "rot", cluster_var = NULL, small_sample = FALSE, no_constant = FALSE) {
   
   ## DATA PROCESSING ===========================================================
   
@@ -355,3 +355,4 @@ score_test <- function(formula = NULL, data = NULL, y = NULL, X = NULL, Z = NULL
   return(result)
   
 }
+
