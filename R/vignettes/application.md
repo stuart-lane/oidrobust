@@ -54,9 +54,13 @@ overidentification testing compared to the $J$-test.
 
 ## 2     Model
 
-The model of interest is $$
+The model of interest is 
+
+$$
 \Delta c_{t+1} = \mu_c + \psi r_{t+1} + u_{t+1} \tag{1} \label{eis_regression}
-$$ where $\Delta c_{t+1}$ is the log of the consumption growth rate at
+$$
+
+where $\Delta c_{t+1}$ is the log of the consumption growth rate at
 time $t+1$, $r_{t+1}$ is the log of the real interest rate at time
 $t+1$, $\psi$ is the parameter of interest, $\mu_c$ is a constant, and
 $u_{t+1}$ is the unobserved error. The total number of observations is
